@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b0f19">
+<title>KAISOUL AI</title>
+
+<style>
+*{box-sizing:border-box}
+
+:root{
+  --bg:#0b0f19;
+  --panel:#111827;
+  --panel2:#182235;
+  --text:#f8fafc;
+  --muted:#94a3b8;
+  --border:#263247;
+  --accent:#6366f1;
+  --user:#293449;
+  --green:#22c55e;
+  --red:#ef4444;
+}
+
+body.light{
+  --bg:#f5f7fb;
+  --panel:#ffffff;
+  --panel2:#eef2f7;
+  --text:#111827;
+  --muted:#64748b;
+  --border:#d7dee9;
+  --user:#e8edf5;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+}
+
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+
+.app{
+  width:100%;
+  height:100dvh;
+}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;
+  z-index:100;
+  top:0;
+  left:0;
+  width:290px;
+  height:100%;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  transform:translateX(-100%);
+  transition:.25s ease;
+  display:flex;
+  flex-direction:column;
+}
+
+.sidebar.open{
+  transform:translateX(0);
+}
+
+.side-head{
+  height:65px;
+  padding:0 15px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+
+.logo{
+  font-size:19px;
+  font-weight:800;
+}
+
+.close-menu{
+  border:0;
+  background:transparent;
+  color:var(--text);
+  font-size:28px;
+}
+
+.new-wrap{
+  padding:14px;
+}
+
+.new-chat{
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--panel2);
+  color:var(--text);
+  font-weight:700;
+}
+
+.history-title{
+  padding:0 15px 8px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.history{
+  flex:1;
+  overflow:auto;
+  padding:0 10px;
+}
+
+.history-item{
+  padding:11px 12px;
+  margin-bottom:4px;
+  border-radius:10px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  cursor:pointer;
+}
+
+.history-item:hover{
+  background:var(--panel2);
+}
+
+.side-bottom{
+  padding:12px;
+  border-top:1px solid var(--border);
+  display:grid;
+  gap:8px;
+}
+
+.side-btn{
+  width:100%;
+  padding:11px;
+  border:0;
+  border-radius:10px;
+  background:var(--panel2);
+  color:var(--text);
+  text-align:left;
+}
+
+/* OVERLAY */
+.overlay{
+  display:none;
+  position:fixed;
+  z-index:90;
+  inset:0;
+  background:rgba(0,0,0,.5);
+}
+
+.overlay.show{
+  display:block;
+}
+
+/* MAIN */
+.main{
+  width:100%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  height:65px;
+  flex-shrink:0;
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:var(--panel);
+  border-bottom:1px solid var(--border);
+}
+
+.menu-btn{
+  width:42px;
+  height:42px;
+  border:0;
+  border-radius:11px;
+  background:var(--panel2);
+  color:var(--text);
+  font-size:22px;
+}
+
+.title{
+  flex:1;
+  font-weight:800;
+}
+
+.model{
+  max-width:155px;
+  padding:8px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--panel2);
+  color:var(--text);
+}
+
+/* STATUS */
+.status{
+  height:32px;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  padding:0 15px;
+  background:var(--bg);
+  border-bottom:1px solid var(--border);
+  color:var(--muted);
+  font-size:12px;
+}
+
+.status-dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--green);
+  margin-right:7px;
+}
+
+.status-dot.error{
+  background:var(--red);
+}
+
+/* CHAT */
+.chat{
+  flex:1;
+  overflow-y:auto;
+  padding:20px 12px 150px;
+}
+
+.messages{
+  max-width:900px;
+  margin:auto;
+}
+
+.welcome{
+  text-align:center;
+  padding:45px 15px 20px;
+}
+
+.welcome-logo{
+  width:72px;
+  height:72px;
+  margin:0 auto 18px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--accent);
+  color:#fff;
+  font-size:27px;
+  font-weight:900;
+}
+
+.welcome h1{
+  margin:0 0 8px;
+  font-size:30px;
+}
+
+.welcome p{
+  max-width:560px;
+  margin:auto;
+  color:var(--muted);
+  line-height:1.6;
+}
+
+.quick{
+  max-width:520px;
+  margin:25px auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.quick button{
+  padding:12px 8px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--panel);
+  color:var(--text);
+}
+
+.quick button:hover{
+  background:var(--panel2);
+}
+
+.commands{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.8;
+}
+
+/* MESSAGES */
+.msg{
+  display:flex;
+  margin:15px 0;
+}
+
+.msg.user{
+  justify-content:flex-end;
+}
+
+.bubble{
+  max-width:min(850px,94%);
+  padding:12px 14px;
+  border-radius:16px;
+  line-height:1.55;
+  overflow:hidden;
+}
+
+.msg.user .bubble{
+  background:var(--user);
+}
+
+.msg.ai .bubble{
+  background:var(--panel);
+  border:1px solid var(--border);
+}
+
+.meta{
+  color:var(--muted);
+  font-size:11px;
+  margin-bottom:5px;
+}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:9px;
+}
+
+.small-btn{
+  padding:6px 9px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--panel2);
+  color:var(--text);
+  font-size:12px;
+}
+
+/* CODE */
+pre{
+  position:relative;
+  margin:10px 0;
+  padding:38px 14px 14px;
+  background:#05070b;
+  color:#e5e7eb;
+  border:1px solid var(--border);
+  border-radius:11px;
+  overflow:auto;
+}
+
+code{
+  font-family:Consolas,Monaco,monospace;
+  font-size:13px;
+  white-space:pre-wrap;
+}
+
+.code-copy{
+  position:absolute;
+  top:8px;
+  right:8px;
+  padding:5px 8px;
+  border:1px solid #374151;
+  border-radius:7px;
+  background:#111827;
+  color:#fff;
+  font-size:11px;
+}
+
+/* INPUT */
+.input-area{
+  position:fixed;
+  z-index:20;
+  bottom:0;
+  left:0;
+  width:100%;
+  padding:9px 10px calc(9px + env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,var(--bg) 22%);
+}
+
+.composer{
+  max-width:900px;
+  margin:auto;
+  padding:7px;
+  display:flex;
+  align-items:flex-end;
+  gap:6px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:17px;
+}
+
+textarea{
+  flex:1;
+  min-height:43px;
+  max-height:150px;
+  resize:none;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--text);
+  padding:11px 8px;
+}
+
+textarea::placeholder{
+  color:var(--muted);
+}
+
+.icon-btn{
+  width:42px;
+  height:42px;
+  flex-shrink:0;
+  border:0;
+  border-radius:10px;
+  background:var(--panel2);
+  color:var(--text);
+  font-size:18px;
+}
+
+.send{
+  background:var(--accent);
+  color:#fff;
+  font-size:20px;
+}
+
+.send:disabled{
+  opacity:.5;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  z-index:200;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:min(92%,430px);
+  padding:18px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:17px;
+  display:none;
+}
+
+.modal.show{
+  display:block;
+}
+
+.modal h2{
+  margin-top:0;
+}
+
+.setting{
+  margin:15px 0;
+}
+
+.setting label{
+  display:block;
+  margin-bottom:7px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.setting input{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  outline:0;
+  background:var(--panel2);
+  color:var(--text);
+}
+
+.close-modal{
+  width:100%;
+  padding:11px;
+  border:0;
+  border-radius:10px;
+  background:var(--accent);
+  color:#fff;
+}
+
+@media(max-width:600px){
+  .model{
+    max-width:130px;
+    font-size:12px;
+  }
+
+  .title{
+    font-size:15px;
+  }
+
+  .welcome{
+    padding-top:30px;
+  }
+
+  .welcome h1{
+    font-size:27px;
+  }
+
+  .bubble{
+    max-width:96%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- MENU -->
+<aside class="sidebar" id="sidebar">
+  <div class="side-head">
+    <div class="logo">KAISOUL AI</div>
+    <button class="close-menu" id="closeMenu">×</button>
+  </div>
+
+  <div class="new-wrap">
+    <button class="new-chat" id="newChat">
+      ＋ Trò chuyện mới
+    </button>
+  </div>
+
+  <div class="history-title">
+    📜 Lịch sử trò chuyện
+  </div>
+
+  <div class="history" id="history"></div>
+
+  <div class="side-bottom">
+    <button class="side-btn" id="themeBtn">
+      🌙 Dark / Light
+    </button>
+
+    <button class="side-btn" id="settingsBtn">
+      ⚙️ Settings
+    </button>
+  </div>
+</aside>
+
+<div class="overlay" id="overlay"></div>
+
+<!-- MAIN -->
+<main class="main">
+  <header class="topbar">
+    <button class="menu-btn" id="menuBtn">☰</button>
+
+    <div class="title">KAISOUL AI</div>
+
+    <select class="model" id="model">
+      <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+      <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+    </select>
+  </header>
+
+  <div class="status">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Sẵn sàng</span>
+  </div>
+
+  <!-- CHAT -->
+  <section class="chat" id="chat">
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-logo">&lt;/&gt;</div>
+        <h1>KAISOUL AI</h1>
+        <p>AI Coding Assistant — chuyên lập trình, debug, web development và kỹ thuật phần mềm.</p>
+
+        <div class="quick">
+          <button data-prompt="/code/ Tạo một website HTML CSS JS đơn giản">💻 Code</button>
+          <button data-prompt="Hãy debug đoạn code này:">🐛 Debug</button>
+          <button data-prompt="Review đoạn code này và tìm lỗi:">🔍 Review</button>
+          <button data-prompt="Tối ưu đoạn code này:">⚡ Optimize</button>
+        </div>
+
+        <div class="commands">
+          <b>Lệnh nhanh</b><br>
+          /code/ — tạo code<br>
+          /calculate/ — máy tính<br>
+          /clock/ — xem giờ<br>
+          /date/ — xem ngày
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- INPUT -->
+<div class="input-area">
+  <div class="composer">
+    <input type="file" id="fileInput" hidden accept="image/*,.txt,.js,.html,.css,.json,.md,.py,.java,.cpp,.c">
+    <button class="icon-btn" id="fileBtn" title="Gửi file hoặc ảnh">📎</button>
+    <textarea id="input" rows="1" placeholder="Hỏi KAISOUL AI..."></textarea>
+    <button class="icon-btn" id="micBtn" title="Nhập giọng nói">🎤</button>
+    <button class="icon-btn send" id="sendBtn" type="button">➤</button>
+  </div>
+</div>
+
+</div>
+
+<!-- SETTINGS -->
+<div class="modal" id="settingsModal">
+  <h2>⚙️ Settings</h2>
+  <div class="setting">
+    <label>System Prompt</label>
+    <input id="systemPrompt" value="Bạn là KAISOUL AI, chuyên gia lập trình. Không bịa thông tin.">
+  </div>
+  <button class="close-modal" id="closeSettings">Đóng</button>
+</div>
+
+<script>
+"use strict";
+
+/* ELEMENTS */
+const $ = id => document.getElementById(id);
+
+const sidebar = $("sidebar");
+const overlay = $("overlay");
+const menuBtn = $("menuBtn");
+const closeMenu = $("closeMenu");
+const newChat = $("newChat");
+const historyEl = $("history");
+const themeBtn = $("themeBtn");
+const settingsBtn = $("settingsBtn");
+const settingsModal = $("settingsModal");
+const closeSettings = $("closeSettings");
+const input = $("input");
+const sendBtn = $("sendBtn");
+const messages = $("messages");
+const welcome = $("welcome");
+const model = $("model");
+const fileBtn = $("fileBtn");
+const fileInput = $("fileInput");
+const micBtn = $("micBtn");
+const statusDot = $("statusDot");
+const statusText = $("statusText");
+
+let conversation = [];
+let currentChatId = null;
+let histories = JSON.parse(localStorage.getItem("kaisoul_history") || "[]");
+
+/* INITIALIZE */
+renderHistory();
+
+/* MENU */
+function openMenu(){
+  sidebar.classList.add("open");
+  overlay.classList.add("show");
+}
+
+function closeMenuFn(){
+  sidebar.classList.remove("open");
+  overlay.classList.remove("show");
+}
+
+menuBtn.onclick = openMenu;
+closeMenu.onclick = closeMenuFn;
+overlay.onclick = closeMenuFn;
+
+/* THEME & SETTINGS */
+themeBtn.onclick = () => document.body.classList.toggle("light");
+settingsBtn.onclick = () => settingsModal.classList.add("show");
+closeSettings.onclick = () => settingsModal.classList.remove("show");
+
+/* HISTORY */
+function saveHistory(){
+  localStorage.setItem("kaisoul_history", JSON.stringify(histories));
+}
+
+function renderHistory(){
+  historyEl.innerHTML = "";
+  histories.forEach(chat => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+    item.textContent = chat.title || "Cuộc trò chuyện";
+    item.onclick = () => {
+      currentChatId = chat.id;
+      conversation = chat.messages || [];
+      renderConversation();
+      closeMenuFn();
+    };
+    historyEl.appendChild(item);
+  });
+}
+
+function renderConversation(){
+  messages.innerHTML = "";
+  if(!conversation.length){
+    messages.appendChild(welcome);
+    return;
+  }
+  conversation.forEach(msg => {
+    addMessageToUI(msg.role === "assistant" ? "ai" : "user", msg.content, false);
+  });
+  $("chat").scrollTop = $("chat").scrollHeight;
+}
+
+function saveCurrentHistory(){
+  if(!conversation.length) return;
+  const first = conversation.find(x => x.role === "user");
+  const title = first?.content?.slice(0,45) || "Cuộc trò chuyện";
+
+  if(!currentChatId){
+    currentChatId = Date.now().toString();
+  }
+
+  histories = histories.filter(x => x.id !== currentChatId);
+  histories.unshift({
+    id: currentChatId,
+    title,
+    messages: conversation
+  });
+
+  histories = histories.slice(0,50);
+  saveHistory();
+  renderHistory();
+}
+
+newChat.onclick = () => {
+  currentChatId = null;
+  conversation = [];
+  messages.innerHTML = "";
+  messages.appendChild(welcome);
+  closeMenuFn();
+};
+
+/* HTML FORMATTING */
+function escapeHTML(str){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
+
+function formatAI(text){
+  let s = escapeHTML(text);
+
+  s = s.replace(/```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g, (match, lang, code) => {
+    return `<pre><button class="code-copy" onclick="copyCode(this)">Copy</button><code>${code.trim()}</code></pre>`;
+  });
+
+  s = s.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  s = s.replace(/\n/g, "<br>");
+  return s;
+}
+
+/* MESSAGES */
+function addMessageToUI(role, text, scroll = true){
+  if(welcome.parentNode === messages){
+    welcome.remove();
+  }
+
+  const row = document.createElement("div");
+  row.className = "msg " + (role === "user" ? "user" : "ai");
+
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+
+  const meta = document.createElement("div");
+  meta.className = "meta";
+  meta.textContent = role === "user" ? "Bạn" : "KAISOUL AI";
+
+  const content = document.createElement("div");
+  content.innerHTML = formatAI(text);
+
+  bubble.appendChild(meta);
+  bubble.appendChild(content);
+
+  if(role === "ai"){
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const copy = document.createElement("button");
+    copy.className = "small-btn";
+    copy.textContent = "📋 Copy";
+    copy.onclick = () => navigator.clipboard.writeText(text);
+
+    const speak = document.createElement("button");
+    speak.className = "small-btn";
+    speak.textContent = "🔊 Đọc";
+    speak.onclick = () => {
+      speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "vi-VN";
+      speechSynthesis.speak(utterance);
+    };
+
+    actions.append(copy, speak);
+    bubble.appendChild(actions);
+  }
+
+  row.appendChild(bubble);
+  messages.appendChild(row);
+
+  if(scroll){
+    $("chat").scrollTop = $("chat").scrollHeight;
+  }
+}
+
+window.copyCode = function(button){
+  const code = button.parentElement.querySelector("code").innerText;
+  navigator.clipboard.writeText(code);
+  button.textContent = "Copied";
+  setTimeout(() => {
+    button.textContent = "Copy";
+  }, 1200);
+};
+
+/* SPECIAL COMMANDS */
+function specialCommand(text){
+  const value = text.trim();
+
+  if(value === "/date/"){
+    return new Date().toLocaleDateString("vi-VN", {
+      weekday: "long", year: "numeric", month: "long", day: "numeric"
+    });
+  }
+
+  if(value.startsWith("/clock/")){
+    return new Date().toLocaleTimeString("vi-VN");
+  }
+
+  if(value.startsWith("/calculate/")){
+    const expression = value.replace("/calculate/", "").trim();
+    if(!expression) return "Nhập phép tính sau /calculate/";
+    if(!/^[0-9+\-*/().%\s]+$/.test(expression)) return "Phép tính không hợp lệ.";
+    try{
+      return String(Function('"use strict";return (' + expression + ')')());
+    }catch{
+      return "Không thể tính phép tính này.";
+    }
+  }
+
+  return null;
+}
+
+/* SEND MESSAGE */
+async function sendMessage(){
+  const text = input.value.trim();
+  if(!text) return;
+
+  input.value = "";
+  input.style.height = "auto";
+
+  addMessageToUI("user", text);
+  conversation.push({ role: "user", content: text });
+
+  const special = specialCommand(text);
+  if(special !== null){
+    addMessageToUI("ai", special);
+    conversation.push({ role: "assistant", content: special });
+    saveCurrentHistory();
+    return;
+  }
+
+  const loading = document.createElement("div");
+  loading.className = "msg ai";
+  loading.innerHTML = `
+    <div class="bubble">
+      <div class="meta">KAISOUL AI</div>
+      Đang suy nghĩ...
+    </div>
+  `;
+  messages.appendChild(loading);
+  $("chat").scrollTop = $("chat").scrollHeight;
+
+  sendBtn.disabled = true;
+
+  try{
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: text,
+        model: model.value,
+        history: conversation.slice(-20),
+        systemPrompt: $("systemPrompt").value
+      })
+    });
+
+    let data;
+    try{
+      data = await response.json();
+    }catch{
+      throw new Error("Server không trả về JSON hợp lệ.");
+    }
+
+    loading.remove();
+
+    if(!response.ok){
+      throw new Error(data.error || "Server trả về lỗi.");
+    }
+
+    const reply = data.reply || "AI không trả về nội dung.";
+    addMessageToUI("ai", reply);
+    conversation.push({ role: "assistant", content: reply });
+    saveCurrentHistory();
+
+    statusDot.classList.remove("error");
+    statusText.textContent = "Sẵn sàng";
+
+  }catch(error){
+    loading.remove();
+    const errorText = "⚠️ Không thể kết nối KAISOUL AI.\n\n" + error.message;
+    addMessageToUI("ai", errorText);
+    statusDot.classList.add("error");
+    statusText.textContent = "Server/API lỗi";
+  }finally{
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+
+/* EVENT BINDINGS */
+sendBtn.onclick = sendMessage;
+
+input.onkeydown = (e) => {
+  if(e.key === "Enter" && !e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+};
+
+/* Quick Prompt Buttons */
+document.querySelectorAll(".quick button").forEach(btn => {
+  btn.onclick = () => {
+    input.value = btn.dataset.prompt;
+    input.focus();
+  };
+});
+</script>
+</body>
+  </html>
+  
