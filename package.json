@@ -1,0 +1,16 @@
+{
+  "name": "kaisoul-ai",
+  "version": "1.0.0",
+  "description": "KAISOUL AI Coding Assistant",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
